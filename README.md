@@ -21,30 +21,22 @@
 + [网络](/docs/browser/6.internet.md)
 
 #### Javascript
-
 + [this指针](/docs/javascript/this.md)
 + [OOP](/docs/javascript/OOP.md)
 + [模块化](/docs/javascript/module.md)
-+ [promise](/docs/javascript/promise/README.md)
++ [promise](/docs/javascript/promise.md)
++ [ES6 & ES Next](/docs/javascript/es6&esNext/README.md)
 
 #### TypeScript
+
 #### Webpack
++ [前端工程化](/docs/webpack/工程化.md)
++ [webpack相关面试题](/docs/webpack/webpack.md)
 
 #### Nodejs
-
 #### Vue
 
 #### React
 
 #### 前端工程化解决方案
 #### 微前端
-
-+ [浏览器存储](/codes/前端/浏览器存储.md)
-+ [浏览器进程与线程](/codes/前端/浏览器进程与线程.md)
-+ [前端性能2](/codes/前端/前端性能2.md)
-+ [微前端-模块联邦](/codes/前端/微前端-模块联邦.md)
-+ [微前端之为什么需要微前端](/codes/前端/微前端之为什么需要微前端.md)
-+ [从输入URL到页面发生了什么](/codes/前端/从输入URL到页面发生了什么.md)
-+ [微前端-single-spa实现原理](/codes/前端/微前端-single-spa实现原理.md)
-+ [qiankun实战](/codes/前端/qiankun实战.md)
-+ [模块化](/codes/前端/模块化.md)
