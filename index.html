@@ -12,8 +12,14 @@
   <div id="app"></div>
   <script>
     window.$docsify = {
-      name: '',
-      repo: ''
+      alias: {
+        '/.*/_sidebar.md': 'settings/_sidebar.md'
+      },
+      name: "Btrya's Blog",
+      repo: 'https://github.com/Btrya/algorithm',
+      loadSidebar: 'settings/_sidebar.md',
+      subMaxLevel: 2,
+      coverpage: 'settings/_coverpage.md'
     }
   </script>
   <!-- Docsify v4 -->
