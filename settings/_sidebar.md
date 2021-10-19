@@ -1,3 +1,6 @@
+- 算法整理
+  - [树](/docs/algorithm/1.树.md)
+
 - HTML
   - [DOCTYPE](/docs/html/1.DOCTYPE.md)
   - [标签相关](/docs/html/2.元素标签相关.md)
