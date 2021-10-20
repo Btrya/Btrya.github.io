@@ -1,4 +1,5 @@
 - 算法整理
+  - [入门基础概念](/docs/algorithm/0.前章.md)
   - [树](/docs/algorithm/1.树.md)
 
 - HTML
