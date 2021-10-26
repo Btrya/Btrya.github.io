@@ -1,6 +1,7 @@
 - 算法整理
   - [入门基础概念](/docs/algorithm/0.前章.md)
   - [树](/docs/algorithm/1.树.md)
+  - [排序](/docs/algorithm/2.排序.md)
 
 - HTML
   - [DOCTYPE](/docs/html/1.DOCTYPE.md)
