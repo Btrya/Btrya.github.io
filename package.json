@@ -1,0 +1,22 @@
+{
+  "name": "btrya.github.io",
+  "version": "1.0.0",
+  "description": "欢迎来到我的博客，让我们开始学习吧",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "serve": "docsify serve"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Btrya/Btrya.github.io.git"
+  },
+  "author": "Btrya",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Btrya/Btrya.github.io/issues"
+  },
+  "homepage": "https://github.com/Btrya/Btrya.github.io#readme"
+}
