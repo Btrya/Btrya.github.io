@@ -61,7 +61,7 @@ Object.setPrototypeOf() 方法设置一个指定的对象的原型 ( 即, 内部
 答：
 因为创建变量时基本包装类型做了一次 `new String('aaa')` 的操作
 
-1. 1+1                 2
+3. 1+1                 2
    1+'1'               '11'
    1+{}                '1[object Object]'
    1+[]                '1'
@@ -71,3 +71,71 @@ Object.setPrototypeOf() 方法设置一个指定的对象的原型 ( 即, 内部
    []===false          false
    []=={}              false
    []==false           true
+
+## CSS
+1. flex:1代表了什么意思
+答：
+flex-grow: 1; flex-shrink : 1; flex-basis: auto;
+
+2. 单行文本溢出省略号和一个向下的三角形  css怎么写
+答：
+单行文本溢出省略号：overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+向下三角形：
+width: 0;
+height: 0;
+border-style: solid;
+border-width: 100px 100px 0 100px;
+border-color: #007bff transparent transparent transparent;
+
+3. flex布局 有哪些常用属性
+答：
+flex-direction 决定排列方向 
+flex-wrap 规定轴线如何换行
+justify-content 主轴对齐方式
+align-items 交叉轴对齐方式
+align-content 多根轴线的对齐方式，只有一根轴线不起作用
+
+4.  css如何开启硬件加速
+答：
+利用transform: translateZ(0);欺骗浏览器开启gpu加速
+
+5. 如何在浏览器画出一个正方形  如何保证这个正方形是浏览器可视区最大的？
+答：
+
+第一种：
+```css
+.container {
+   width: 100vmin;
+   height: 100vmin;
+   border: 1px solid #000;
+}
+```
+第二种：
+```css
+.container {
+   width: 100vmin;
+   padding-top: 100vmin;
+   border: 1px solid #000;
+}
+```
+第三种：
+```css
+.container {
+   border: 1px solid #000;
+   width: 100vmin;
+}
+.child{
+   width: 100%;
+   padding-top: 100%;
+}
+```
+第四种：
+```css
+.container::before {
+   content: "";
+   width: 100vmin;
+   display: block;
+   padding-top: 100%;
+   border: 1px solid #000;
+}
+```
