@@ -1,4 +1,4 @@
-## HTTP
+## 浏览器 & HTTP
 1. http相关 204 206 301 302 304 400 401 403 404状态码含义
 
 (1) 2XX成功
@@ -56,6 +56,27 @@ HTTPS加密请求（一次握手）过程首先，客户端发起握手请求，
 基本属性比如max-age/expire/domain/path以及安全相关的secure/httpOnly/same-site等等, 
 有特定场景下会使用到，比如顶级域名和子级域名之间的cookie共享和相互修改、删除，会用到domain。
 
+9. 在浏览器里，从输入URL到页面展示，这中间发生了什么？ https://blog.csdn.net/x550392236/article/details/106473683
+- 用户输入url并回车
+- 浏览器进程检查url，组装协议，构成完整的url
+- 浏览器进程通过进程间通信（IPC）把url请求发送给网络进程
+- 网络进程接收到url请求后检查本地缓存是否缓存了该请求资源，如果有则将该资源返回给浏览器进程
+- 如果没有，网络进程向web服务器发起http请求（网络请求），请求流程如下：
+   - 进行DNS解析，获取服务器ip地址，端口（端口是通过dns解析获取的吗？这里有个疑问） 
+   - 利用ip地址和服务器建立tcp连接
+   - 构建请求头信息
+   - 发送请求头信息
+   - 服务器响应后，网络进程接收响应头和响应信息，并解析响应内容
+- 网络进程解析响应流程；
+   - 检查状态码，如果是301/302，则需要重定向，从Location自动中读取地址，重新进行第4步 （301/302跳转也会读取本地缓存吗？这里有个疑问），如果是200，则继续处理请求。
+   - 200响应处理：检查响应类型Content-Type，如果是字节流类型，则将该请求提交给下载管理器，该导航流程结束，不再进行后续的渲染，如果是html则通知浏览器进程准备渲染进程准备进行渲染。
+- 准备渲染进程
+   - 浏览器进程检查当前url是否和之前打开的渲染进程根域名是否相同，如果相同，则复用原来的进程，如果不同，则开启新的渲染进程
+- 传输数据、更新状态
+   - 渲染进程准备好后，浏览器向渲染进程发起“提交文档”的消息，渲染进程接收到消息和网络进程建立传输数据的“管道”
+   - 渲染进程接收完数据后，向浏览器发送“确认提交”
+   - 浏览器进程接收到确认消息后更新浏览器界面状态：安全、地址栏url、前进后退的历史状态、更新web页面
+#
 
 ## JS
 1. Object.setPrototypeOf和Object.create 区别
@@ -140,6 +161,99 @@ pageshow事件在每次页面加载时都会触发，无论是首次加载还是
 pageshow事件暴露的persisted可判断页面是否从缓存里取出。
 window.addEventListener("pageshow", e => e.persisted && location.reload());
 
+11. Object.create()手写？
+```js
+function create(obj) {
+   function F() {}
+   F.prototype = obj
+   return new F()
+}
+```
+
+12. 为什么Object.create()要创建一个function F() {}不直接return {__proto__: obj}？
+{__proto__:obj}不能保证此对象的原型就是obj，但是F.prototype = obj;return new F();浏览器就会根据自己的实现去将返回实例的原型设置为obj。（__proto__存在于非IE）
+
+13. 你知道的浅拷贝有哪些？
+Object.assign，
+slice，
+concat，
+扩展运算符,
+Object.create,
+for循环
+
+14. 说说Object.assign和扩展运算符的区别
+Object.assign()方法接收的第一个参数作为目标对象，后面的所有参数作为源对象。然后把所有的源对象合并到目标对象中。它会修改了一个对象，因此会触发 ES6 setter。
+
+扩展操作符（…）使用它时，数组或对象中的每一个值都会被拷贝到一个新的数组或对象中。它不复制继承的属性或类的属性，但是它会复制ES6的 symbols 属性。
+
+15. 你知道的深拷贝有哪些？(让你实现，你会怎么设计)
+1.JSON.parse(JSON.stringify())
+缺陷：会忽略 undefined
+会忽略 symbol
+不能序列化函数
+无法拷贝不可枚举的属性
+无法拷贝对象的原型链
+拷贝 RegExp 引用类型会变成空对象
+拷贝 Date 引用类型会变成字符串
+对象中含有 NaN、Infinity 以及 -Infinity，JSON 序列化的结果会变成 null
+不能解决循环引用的对象，即对象成环 (obj[key] = obj)。
+2.自己设计深拷贝函数
+考虑的点：
+1.递归 （存在问题，不够健壮）
+2.需考虑数组 （问题是只考虑了普通的object，没有考虑数组的话会有问题）
+3.循环引用（如果递归进入死循环会导致栈内存溢出了）
+4.性能优化（历数组和对象都使用了for in这种方式，实际上for in在遍历时效率是非常低的）
+5.其他数据类型（只考虑了普通的object和array两种数据类型，实际上所有的引用类型不止这两个，就需要精确判断引用类型）
+自己设计思路：
+【基础版】递归实现，通过 for in 遍历传入参数的属性值，如果值是引用类型则再次递归调用该函数，如果是基础数据类型就直接复制。
+【存在问题】：1.简单的递归实现深拷贝的函数并不能复制不可枚举的属性以及 Symbol 类型；
+2.这种方法只是针对普通的引用类型的值做递归复制，而对于 Array、Date、RegExp、Error、Function 这样的引用类型并不能正确地拷贝；
+3.对象的属性里面成环，即循环引用没有解决。
+
+16.  Promise执行过程中可以中断吗？若想中断，怎么对其进行中断。
+怎么对其进行中断。
+Promise执行是不可以中断的。但实际需求中会出现一种场景，就是在合适的时候，把pending状态的promise给reject掉。例如把网络请求设置超时时间，一旦超时就中断。
+这里用定时器模拟一个网络请求，
+function timeoutWrapper(p,timeout =2000){
+     const wait = new Prkmise(ersolve,reject){
+        setTimeout(()=>{
+
+          reject('请求超时')
+          
+       }，timeout)
+    }
+    return Promise.race([p,wait])
+}
+
+17. event loop 执行过程。
+   事件循环从宏任务队列开始，这时宏任务队列中只有一个script（整体代码）任务，遇到任务源时，分发到相应的任务队列中。
+   异步任务可分为task 和 microtask 两类(requestAnimationFrame 既不属于 macrotask, 也不属于 microtask)，不同的API注册的异步任务会 依次进入自身对应的队列中，然后等待 Event Loop 将它们依次压入执行栈中执行。
+
+ 
+18. property 和attribute的区别。
+   —property是DOM元素作为对象，附加的内容
+   —attribute是dom节点自带的属性它的值只能够是字符串
+   —attributes是属于property的一个子集
+   —HTML标签中定义的属性和值会保存该DOM对象的attributes属性里面
+   —对于 html 的标准属性来说，attribute 和 property 是同步的，是会自动更新的，但是对于自定义的属性来说，他们是不同步的。
+ 
+19. 数组去重的方式。
+   Set, filter, 双层for循环然后splice去重,indexof去重,sort,includes,hasOwnProperty,map,[…new Set(arr)]
+
+20. set和map的区别。
+   set不允许元素重复
+   属性和方法：size-获取元素数量；add(value)-添加元素，返回set实例本身；delete(value)-删除元素返回一个布尔值；has(value)-返回布尔  值，表示该值是否是set实例的元素；clear()-清除所有元素，无返回值。
+   map的key可以是任何数据类型，Map中的键值是有序的，Map的键值对个数可以从 size 属性获取。
+   属性和方法：set：设置成员key和value; get :获取成员属性值；has:判断是否值存在；delete：删除；clear：清除所有
+
+21. 介绍一下symbol。
+   —typeof symbol  =  "symbol"
+   —不能使用new命令
+   —相同参数的symbol（）返回的值是不相等的：例如let a = Symbol(‘a’) let b = Symbol（’a’）a===b 返回false
+   —Symbol 值作为属性名时，该属性是公有属性不是私有属性
+   —Symbol 作为对象的属性名，可以保证属性不重名,可以在类的外部访问。
+   —Symbol 作为对象属性名时不能用.运算符，要用方括号[]
+
 ## CSS
 1. flex:1代表了什么意思
 
@@ -207,3 +321,16 @@ align-content 多根轴线的对齐方式，只有一根轴线不起作用
    border: 1px solid #000;
 }
 ```
+6. 什么是BFC,如何形成BFC
+BFC:块级格式化上下文.通俗的说就是一个完全独立的空间（布局环境），让空间里的子元素不会影响到外面的布局。
+如何形成BFC：
+overflow: hidden
+display: inline-block
+position: absolute
+position: fixed
+display: table-cell
+display: flex
+解决了什么问题：
+1.使用Float脱离文档流，高度塌陷
+2.Margin边距重叠
+3.两栏布局，Float脱离文档后文字环绕问题

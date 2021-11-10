@@ -234,7 +234,7 @@ console.log(g.next()) // {value: undefined, done: true}
 
 1. 每当执行完一条yield语句后函数就会自动停止执行，直到再次调用next();
 2. yield关键字只可在生成器内部使用，在其他地方使用会导致程序抛出错误;
-3. 可以通过函数表达式来创建生成器，但是不能使用尖头函数
+3. 可以通过函数表达式来创建生成器，但是不能使用箭头函数
    `let generator = function *() {}`
 
 ### Async 和 Await
