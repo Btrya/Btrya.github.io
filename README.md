@@ -46,6 +46,11 @@
 #### React
 
 #### 前端工程化解决方案
++ [列表无限滚动方案](/docs/solveplan/列表无限滚动方案.md)
++ [数据埋点方案、监控方案](/docs/solveplan/数据埋点方案、监控方案.md)
+
+#### 设计模式
++ [JavaScript 设计模式及应用实践](/docs/designmode/readme.md)
 #### 微前端
 + [浏览器存储](/docs/microfrontend/浏览器存储.md)
 + [浏览器进程与线程](/docs/microfrontend/浏览器进程与线程.md)

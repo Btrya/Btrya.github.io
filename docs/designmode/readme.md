@@ -86,3 +86,128 @@ function Factory(name, age, identity) {
 工厂模式其实就是`将创建对象的过程单独封装`。使我们不必去关心创建过程中发生了什么，只要能给到我们实例即可。
 
 所以工厂模式的目的就是为了实现 `无脑传参` 。
+
+### 抽象工厂模式
+
+对比一下简单的工厂模式，假如有更多 身份 那么还需要去修改 Factory 函数，这也是不可取的，违背了开放封闭原则
+
+我们需要做的就是让 软件实体(类、模块、函数)可以扩展，但是不可以修改。
+
+因此才有了抽象工厂模式，举一个 `组装手机` 的例子：
+
+抽象工厂：
+```js
+class MobilePhoneFactory {
+  // 提供操作系统的接口
+  createOS() {
+    throw new Error("抽象工厂方法不允许直接调用，你需要将我重写！")
+  }
+  // 提供硬件的接口
+  createHardWare() {
+    throw new Error("抽象工厂方法不允许直接调用，你需要将我重写！")
+  }
+}
+```
+
+这个`抽象工厂`他是不干活的，应该交给 `具体工厂` 来干活，换句话说 `抽象工厂`就是约定了具体工厂的通用能力
+
+具体工厂：
+```js
+// 具体工程继承自抽象工厂
+class FakeStarFactory extends MobilePhoneFactory {
+  createOS() {
+    // 提供安卓系统实例
+    return new AndroidOS()
+  }
+  createHardWare() {
+    // 提供高通硬件实例
+    return new QualcommHardWare()
+  }
+}
+```
+
+这里看到具体工厂调用了两个构造函数 AndroidOS 和 QualcommHardWare，用于生成具体操作系统和硬件实例。
+
+这种被 new 出具体对象类就叫做 `具体产品类`，相应的也会有 `抽象产品类`
+
+```js
+// 定义操作系统这类产品的抽象产品类
+class OS {
+  controlHardWare() {
+    throw new Error('抽象产品方法不允许直接调用，你需要将我重写！')
+  }
+}
+// 定义硬件这类产品的抽象产品类
+class HardWare() {
+  // 手机硬件的共性方法，这里提取的是“根据命令运转”这个共性
+  operateByOrder() {
+    throw new Error('抽象产品方法不允许直接调用，你需要将我重写！')
+  }
+}
+
+// 定义具体操作系统的具体产品类
+class AndroidOS extends OS {
+  controlHardWare() {
+    console.log('用安卓系统的方式去操作')
+  }
+}
+class AppleOS extends OS {
+  controlHardWare() {
+    console.log('用苹果系统的方式去操作')
+  }
+}
+// 定义具体硬件的具体产品类
+class QualcommHardWare extends HardWare {
+  operateByOrder() {
+    console.log('用高通的方式去运转')
+  }
+}
+class MiWare extends HardWare {
+  operateByOrder() {
+    console.log('用小米的方式去运转')
+  }
+}
+```
+
+这样依赖，当我们需要生产一台FakeStar手机的时候，我们只需要：
+
+```js
+// 这是我的手机
+const myPhone = new FakeStarFactory()
+// 让它拥有操作系统
+const myOS = myPhone.createOS()
+// 让它拥有硬件
+const myHardWare = myPhone.createHardWare()
+// 启动操作系统 输出 '用安卓系统的方式去操作'
+myOS.controlHardWare()
+// 唤醒硬件 输出 '用高通的方式去运转'
+myHardWare.operateByOrder()
+```
+
+如果这时候 FakeStar 手机过气了，我们需要做一款新的手机，不需要修改抽象工厂，而是重新写一个具体工厂即可：
+
+```js
+class newStarFactory extends MobilePhoneFactory {
+  createOS() {
+    // 操作系统实现代码
+  }
+  createHardWare() {
+    // 硬件实现代码
+  }
+}
+```
+
+这样的操作不会对原有系统造成任何潜在影响，那么对于抽象产品类也是同样的道理。
+
+##### 总结
+
+抽象工厂和简单工厂的异同？
+
+都是去分离一个系统中可变和不可变的部分，不同于场景的复杂度
+
+抽象工厂需要支持更好的扩展，因此需要使用抽象类来降低扩展的成本，同时对类的性质做划分，因此有了以下四个关键角色：
+
+- 抽象工厂(抽象类，不能用于生成具体实例)
+- 具体工厂(用于生产产品族里的一个具体的产品)
+- 抽象产品(抽象类，不能用于生成具体实例)
+- 具体产品(用于生成产品族里的一个具体的产品所依赖的更细粒度的产品)
