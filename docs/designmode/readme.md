@@ -211,3 +211,263 @@ class newStarFactory extends MobilePhoneFactory {
 - 具体工厂(用于生产产品族里的一个具体的产品)
 - 抽象产品(抽象类，不能用于生成具体实例)
 - 具体产品(用于生成产品族里的一个具体的产品所依赖的更细粒度的产品)
+
+### 单例模式
+
+单例模式顾名思义就是只有一个实例的意思，当我们创建了一个类(构造函数之后)，通过new关键字调用构造函数可以生成多个实例对象，比如:
+
+```js
+class SingleDog {
+  show() {
+    console.log('我是一个单例对象')
+  }
+}
+
+const s1 = new SingleDog()
+const s2 = new SingleDog()
+
+// false
+s1 === s2
+```
+
+我们可以看到 s1 和 s2 是没有瓜葛的，各自占用了一块内存空间。
+而单例模式要做的就是，`不管我们尝试去创建多少次，它都只给你返回第一次所创建的那唯一的一个实例`
+
+那么要做到这一点就需要构造函数`具备判断自己是否已经创建过一次实例`的能力，那么我们可以这么处理：
+
+```js
+class SingleDog {
+  show() {
+    console.log('我是一个单例对象')
+  }
+  static getInstance() {
+    // 判断是否已经new过1个实例
+    if (!SingleDog.instance) {
+      // 若这个唯一的实例不存在，那么先创建它
+      SingleDog.instance = new SingleDog()
+    }
+    // 如果这个唯一的实例已经存在，则直接返回
+    return SingleDog.instance
+  }
+}
+
+const s1 = SingleDog.getInstance()
+const s2 = SingleDog.getInstance()
+
+// true
+s1 === s2
+```
+
+也可以使用闭包来做这个getInstance：
+
+```js
+SingleDog.getInstance = (function() {
+  // 定义自由变量instance，模拟私有变量
+  let instance = null
+  return function() {
+    // 判断自由变量是否为null
+    if(!instance) {
+      // 如果为null则new出唯一实例
+      instance = new SingleDog()
+    }
+    return instance
+  }
+})()
+```
+
+那么这样的单例模式其实在Vuex就已经使用到了，我们可以想到Vuex中的store其实就是一个单例
+
+##### Vuex如何确保Store的唯一性
+
+在Vue项目中我们是这样引入Vuex的：
+
+```js
+// 安装vuex插件
+Vue.use(Vuex)
+
+// 将store注入到Vue实例中
+new Vue({
+  el: '#app',
+  store
+})
+```
+
+那么实际上利用use来注册插件，通过内部的install方法将store注入到Vue实例中，在install方法中我们也能找到类似上面的getInstance方法的逻辑：
+
+```js
+let Vue // 这个Vue的作用和楼上的instance作用一样
+...
+
+export function install (_Vue) {
+  // 判断传入的Vue实例对象是否已经被install过Vuex插件（是否有了唯一的state）
+  if (Vue && _Vue === Vue) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.error(
+        '[vuex] already installed. Vue.use(Vuex) should be called only once.'
+      )
+    }
+    return
+  }
+  // 若没有，则为这个Vue实例对象install一个唯一的Vuex
+  Vue = _Vue
+  // 将Vuex的初始化逻辑写进Vue的钩子函数里
+  applyMixin(Vue)
+}
+```
+
+由此，Vue应用就可以只保证只有一个Store
+
+### 单例模式面试题
+
+#### 基于localStorage实现单例Storage
+
+1. 静态方法版本
+
+```js
+class Storage {
+  static getInstance() {
+    if (!Storage.instance) {
+      Storage.instance = new Storage()
+    }
+    return Storage.instance
+  }
+  getItem(key) {
+    return localStorage.getItem(key)
+  }
+  setItem(key, value) {
+    return localStorage.setItem(key, value)
+  }
+}
+const storage1 = Storage.getInstance()
+const storage2 = Storage.getInstance()
+
+storage1.setItem('name', '李雷')
+// 李雷
+storage1.getItem('name')
+// 也是李雷
+storage2.getItem('name')
+
+// 返回true
+storage1 === storage2
+```
+
+2. 闭包版本
+
+```js
+function BaseStorage() {}
+BaseStorage.prototype.getItem = function(key) {
+  return localStorage.getItem(key)
+}
+BaseStorage.prototype.setItem = function(key, value) {
+  return localStorage.setItem(key, value)
+}
+const Storage = (function() {
+  let instance = null
+  return function() {
+    if (!instance) {
+      instance = new BaseStorage()
+    }
+    return instance
+  }
+})()
+const storage1 = new Storage()
+const storage2 = new Storage()
+
+storage1.setItem('name', '李雷')
+// 李雷
+storage1.getItem('name')
+// 也是李雷
+storage2.getItem('name')
+
+// 返回true
+storage1 === storage2
+```
+
+#### 实现一个单例全局模态框
+
+基本html
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>单例模式弹框</title>
+</head>
+<style>
+#modal {
+  height: 200px;
+  width: 200px;
+  line-height: 200px;
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border: 1px solid black;
+  text-align: center;
+}
+</style>
+<body>
+	<button id='open'>打开弹框</button>
+	<button id='close'>关闭弹框</button>
+</body>
+<script>
+  // 这里填充核心代码
+</script>
+</html>
+```
+
+1. 闭包版本
+```js
+// 核心代码
+const Modal = (function () {
+  let instance = null
+  return function() {
+    if (!instance) {
+      instance = document.createElement('div')
+      instance.id = 'modal'
+      instance.innerHTML = '这是全局唯一Modal'
+      instance.style.display = 'none'
+      document.body.appendChild(instance)
+    }
+    return instance
+  }
+})()
+document.getElementById('open').addEventListener('click', function() {
+  const modal = new Modal()
+  modal.style.display = 'block'
+})
+document.getElementById('close').addEventListener('click', function() {
+  const modal = new Modal()
+  if (modal) {
+    modal.style.display = 'none'
+  }
+})
+```
+
+2. es6版本
+```js
+// 核心代码
+class Modal {
+  static getInstance() {
+    if (!Modal.instance) {
+      Modal.instance = document.createElement('div')
+      Modal.instance.id = 'modal'
+      Modal.instance.innerHTML = '这是全局唯一Modal'
+      Modal.instance.style.display = 'none'
+      document.body.appendChild(Modal.instance)
+    }
+    return Modal.instance
+  }
+}
+document.getElementById('open').addEventListener('click', function() {
+  const modal = Modal.getInstance()
+  modal.style.display = 'block'
+})
+document.getElementById('close').addEventListener('click', function() {
+  const modal = Modal.getInstance()
+  if (modal) {
+    modal.style.display = 'none'
+  }
+})
+```
